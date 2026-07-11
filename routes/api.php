@@ -193,25 +193,7 @@ Route::prefix('v1/cart')->middleware(['auth:sanctum', 'doctorAuth'])->group(func
 
 Route::post("v1/validateRent/{product}", [CartController::class, "validateRent"])->middleware(["auth:sanctum"]);
 
-Route::prefix('v1/orders')->group(function () { // un Tested
-    Route::middleware(['auth:sanctum', 'doctorAuth'])->group(function () {
-        Route::get('/show', [OrderController::class, 'index']);
-        Route::get('/show/{order}', [OrderController::class, 'show']);
-        Route::post('/create', [OrderController::class, 'store']);
-        Route::post('/cancel/{order}', [OrderController::class, 'cancel']);
-        Route::post('/issue/{order}', [OrderController::class, 'assignIssue']);
-    });
 
-    Route::middleware(['auth:sanctum', 'adminAuth'])->group(function () {
-        Route::post('/admin/status/{order}', [OrderController::class, 'adminUpdateStatus']);
-    });
-
-    Route::middleware(['auth:sanctum', 'supplierAuth'])->group(function () {
-        Route::get('/supplier/show', [OrderController::class, 'supplierIndex']);
-        Route::get('/supplier/show/{order}', [OrderController::class, 'supplierShow']);
-        Route::post('/supplier/return/{order}', [OrderController::class, 'returnRentalProducts']);
-    });
-});
 
 
 //Reset-Password , Logout
@@ -290,9 +272,9 @@ Route::prefix("v1/payment")->middleware(["auth:sanctum", "doctorAuth"])->group(f
 });
 
 
-Route::prefix("v1/order")->middleware("auth:sanctum")->group(function () {
+Route::prefix("v1/order")->middleware(["auth:sanctum","CancelExpiredOrders"])->group(function () {
 
-    Route::prefix("/doctor")->middleware(["auth:sanctum","doctorAuth","CancelExpiredOrders"])->group(function () {
+    Route::prefix("/doctor")->middleware(["auth:sanctum","doctorAuth"])->group(function () {
         Route::get("/show", [OrderController::class, 'index']);
         Route::get("/show/{order}", [OrderController::class, 'show']);
         Route::post("/cancel/{order}", [OrderController::class, 'cancel']);
@@ -303,6 +285,12 @@ Route::prefix("v1/order")->middleware("auth:sanctum")->group(function () {
         Route::get("/show", [OrderController::class, 'supplierIndex']);
         Route::get("/show/{order}", [OrderController::class, 'supplierShow']);
         Route::post("/status/{order}", [OrderController::class, 'assignStatus']);
+        Route::post('/return/{order}', [OrderController::class, 'returnRentalProducts']);
+        Route::post('/cancel/{order}', [OrderController::class, 'cancelItems']);
+
+    });
+     Route::middleware(['adminAuth'])->group(function () {
+        Route::post('/admin/status/{order}', [OrderController::class, 'adminUpdateStatus']);
     });
 });
 Route::post('/webhook_json', [PaymentController::class, 'webhook']);

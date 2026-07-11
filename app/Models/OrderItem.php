@@ -44,14 +44,13 @@ class OrderItem extends Model
     }
 
 
-            public function extendRent()
-        {
-            return $this->hasOne(ExtendRent::class, 'item_id');
-        }
-    public function scopeForSupplier(EloquentBuilder   $query, $supplierId)
+    public function extendRent()
     {
-        return $query->whereHas("product", function ($query) use ($supplierId) {
-            $query->where('supplier_id', $supplierId);
-        });
+        return $this->hasOne(ExtendRent::class, 'item_id');
+    }
+    /** Only items belonging to this supplier (via product) */
+    public function scopeForSupplier($query, int $supplierId)
+    {
+        return $query->whereHas('product', fn($q) => $q->where('supplier_id', $supplierId));
     }
 }

@@ -444,4 +444,67 @@ protected function notifyRentalCancellation(OrderItem $item): void
         report($e);
     }
 }
+
+
+
+
+    /**
+     * Work out what the order status SHOULD be, based on each item's sub_status.
+     * Doesn't save — call refreshStatus() for that.
+     */
+   public function computeStatus(): string
+{
+    $statuses = $this->items->pluck('sub_status');
+    $total = $statuses->count();
+
+    if ($total === 0) {
+        return $this->status;
+    }
+
+    $cancelledCount = $statuses->filter(fn ($s) => $s === 'cancelled')->count();
+
+    if ($cancelledCount === $total) {
+        return 'cancelled';
+    }
+
+    $active = $statuses->reject(fn ($s) => $s === 'cancelled');
+
+    $rank = [
+        'pending'    => 0,
+        'confirmed'  => 1,
+        'paid'       => 2,
+        'processing' => 3,
+        'ready'      => 4,
+        'shipped'    => 5,
+        'delivered'  => 6,
+        'returned'   => 7,
+    ];
+
+    $base = $active->sortByDesc(fn ($s) => $rank[$s] ?? 0)->first();
+
+    $partialable = ['processing', 'ready', 'shipped', 'delivered', 'returned'];
+
+    $isPartial = ($active->unique()->count() > 1 || $cancelledCount > 0)
+        && in_array($base, $partialable, true);
+
+    return $isPartial ? "partial_{$base}" : $base;
+}
+
+    /**
+     * Recompute status from items and save if it changed.
+     * Returns true if the status actually changed.
+     */
+    public function refreshStatus(): bool
+    {
+        $this->load('items');
+        $newStatus = $this->computeStatus();
+
+        if ($this->status !== $newStatus) {
+            $this->status = $newStatus;
+            $this->save();
+            return true;
+        }
+
+        return false;
+    }
 }

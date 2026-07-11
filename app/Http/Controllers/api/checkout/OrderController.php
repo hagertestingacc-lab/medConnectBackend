@@ -15,7 +15,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-      $request->validate([
+        $request->validate([
             "type" => "required|in:sale,rental"
         ], [
             "message" => "type must be sale or rental , by default is sale"
@@ -23,7 +23,7 @@ class OrderController extends Controller
         try {
             $doctor = $request->user()->doctor;
             $perPage = $request->query('per_page', 15);
-            $type = $request["type"]??"sale"; // 'rental' or 'sale'
+            $type = $request["type"] ?? "sale"; // 'rental' or 'sale'
 
             $ordersQuery = $doctor->orders()
                 ->with('items.product')
@@ -37,10 +37,9 @@ class OrderController extends Controller
 
 
             $orders->getCollection()->each(fn($order) => $order->items->makeHidden('sub_status'));
-            if($type=="rental"){
-            $orders->load('items.product.rentalDetails');
-            $orders->load('items.extendRent');
-
+            if ($type == "rental") {
+                $orders->load('items.product.rentalDetails');
+                $orders->load('items.extendRent');
             }
 
             return response()->json([
@@ -65,7 +64,7 @@ class OrderController extends Controller
         if ($order->doctor_id !== $doctor->id) {
             return response()->json(['success' => false, 'error' => 'Unauthorized.'], 403);
         }
-        $order->load(["items.extendRent",'items.product', 'doctor']);
+        $order->load(["items.extendRent", 'items.product', 'doctor']);
         $order->items->makeHidden('sub_status');
         return response()->json([
             'success' => true,
@@ -120,7 +119,7 @@ class OrderController extends Controller
             ], 422);
         }
 
-        
+
 
         return response()->json([
             'success' => true,
@@ -156,51 +155,67 @@ class OrderController extends Controller
     }
 
     public function supplierIndex(Request $request)
-    {
-        $supplier = $request->user()->supplier;
-        $perPage = $request->query('per_page', 15);
+{
+    $supplier = $request->user()->supplier;
+    $perPage = $request->query('per_page', 15);
 
-        $orders = Order::whereHas('items.product', function ($query) use ($supplier) {
-
+    $orders = Order::whereHas('items.product', function ($query) use ($supplier) {
             $query->where('supplier_id', $supplier->id);
         })
-            ->with(['items.product',"items.extendRent", 'doctor', 'doctor.allUser:id,email'])->orderByDesc('created_at')
-            ->paginate($perPage);
+        ->with([
+            'items' => function ($query) use ($supplier) {
+                $query->whereHas('product', function ($q) use ($supplier) {
+                    $q->where('supplier_id', $supplier->id);
+                });
+            },
+            'items.product',
+            'items.extendRent',
+            'doctor',
+            'doctor.allUser:id,email',
+        ])
+        ->orderByDesc('created_at')
+        ->paginate($perPage);
 
+    return response()->json([
+        'success' => true,
+        'data' => $orders->items(),
+        'last_page' => $orders->lastPage(),
+        'per_page' => $orders->perPage(),
+        'total' => $orders->total(),
+    ]);
+}
 
+public function supplierShow(Request $request, Order $order)
+{
+    $supplier = $request->user()->supplier;
 
+    $isRelated = $order->items()->whereHas('product', function ($query) use ($supplier) {
+        $query->where('supplier_id', $supplier->id);
+    })->exists();
+
+    if (! $isRelated) {
         return response()->json([
-            'success' => true,
-            'data' => $orders->items(),
-            'last_page' => $orders->lastPage(),
-            'per_page' => $orders->perPage(),
-            'total' => $orders->total(),
-        ]);
+            'success' => false,
+            'error' => 'Unauthorized.',
+        ], 403);
     }
 
-    public function supplierShow(Request $request, Order $order)
-    {
-        $supplier = $request->user()->supplier;
+    $order->load([
+        'items' => function ($query) use ($supplier) {
+            $query->whereHas('product', function ($q) use ($supplier) {
+                $q->where('supplier_id', $supplier->id);
+            });
+        },
+        'items.product',
+        'items.extendRent',
+        'doctor',
+    ]);
 
-        $isRelated = $order->items()->whereHas('product', function ($query) use ($supplier) {
-            $query->where('supplier_id', $supplier->id);
-        })->exists();
-
-            $order->load('items.extendRent');
-
-
-        if (! $isRelated) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Unauthorized.',
-            ], 403);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => $order->load(['items.product', 'doctor']),
-        ]);
-    }
+    return response()->json([
+        'success' => true,
+        'data' => $order,
+    ]);
+}
 
     // product for supplier
     public function returnRentalProducts(Request $request, Order $order)
@@ -335,6 +350,100 @@ class OrderController extends Controller
 
     public function assignStatus(Request $request, Order $order)
     {
+        $validated = $request->validate(
+            ['status' => 'required|in:processing,ready'],
+            ['status.in' => 'invalid status value']
+        );
+
+        try {
+            $supplier = $request->user()->supplier;
+
+            $updated = $order->items()
+                ->forSupplier($supplier->id)
+                ->whereIn('sub_status', ["paid", "confirmed", "ready", "processing", "partial_ready", "partial_processing"])->update(['sub_status' => $validated['status']]);
+
+            if ($updated === 0) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'No updatable items found for this supplier on this order',
+                ], 404);
+            }
+
+            $changed = $order->refreshStatus();
+
+            if ($changed) {
+                $order->doctor->allUser->notifyNow(
+                    new customNotification("Your order {$order->order_number} is now {$order->status}")
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'order updated successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'An issue occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function cancelItems(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'reason' => 'required|string|max:500',
+        ]);
+
+        try {
+            $supplier = $request->user()->supplier;
+
+            $items = $order->items()
+                ->forSupplier($supplier->id)
+                ->whereIn('sub_status', ["paid", "confirmed", "ready", "processing", "partial_ready", "partial_processing"])
+                ->get();
+
+            if ($items->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'error'   => 'No cancellable items found for this supplier on this order',
+                ], 404);
+            }
+
+            DB::transaction(function () use ($items, $validated) {
+                foreach ($items as $item) {
+                    $item->update([
+                        'sub_status'    => 'cancelled',
+                        'cancel_reason' => $validated['reason'],
+                        'cancelled_at'  => now(),
+                    ]);
+                }
+            });
+
+            $order->refreshStatus();
+
+            $order->doctor->allUser->notifyNow(
+                new customNotification(
+                    "Part of your order {$order->order_number} was cancelled by a supplier. " .
+                        "Reason: {$validated['reason']}. Order status: {$order->status}"
+                )
+            );
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'items cancelled successfully',
+                'order_status' => $order->status,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'An issue occurred: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /*   public function assignStatus(Request $request, Order $order)
+    {
         $validated =  $request->validate(
             [
                 "status" => "required|in:processing,ready"
@@ -380,5 +489,5 @@ class OrderController extends Controller
                 'error' => 'An issue occurred: ' . $e->getMessage(),
             ], 500);
         }
-    }
+    } */
 }
