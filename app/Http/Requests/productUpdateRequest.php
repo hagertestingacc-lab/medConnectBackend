@@ -25,7 +25,14 @@ class productUpdateRequest extends FormRequest
                          $product = $this->route('product');
 
         return [
-            'name'           => 'string|max:255|unique:product,name',
+            'name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('product')
+                ->where(fn ($query) => $query->where('supplier_id', $this->user()->supplier->id))
+                ->ignore($this->route('product')),
+        ],
             'price'          => 'numeric|min:0',
             'category_id'           => 'exists:category,id',
             'stock'          => 'integer|min:0',

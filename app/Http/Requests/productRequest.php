@@ -26,7 +26,14 @@ class productRequest extends FormRequest
 
 
         return [
-            'name'           => 'required|string|max:255',
+             'name' => [
+            'required',
+            'string',
+            'max:255',
+            Rule::unique('product')->where(
+                fn ($query) => $query->where('supplier_id', $this->user()->supplier->id)
+            ),
+        ],
             'price'          => 'required|numeric|min:0',
             'category_id'           => 'required|exists:category,id',
             'stock'          => 'required|integer|min:0',

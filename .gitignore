@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.env.local
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -24,3 +25,6 @@ Homestead.yaml
 Thumbs.db
 
 .vercel
+
+.vercel
+.env*

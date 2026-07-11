@@ -476,6 +476,7 @@ class ProductController extends Controller
                     "allUser_id" => $supplier->allUser?->id,
                     "company_name" => $supplier->company_name,
                     "company_image_url" => $supplier->company_image_url,
+                    "certificate_name" => $supplier->certificate_name,
                     "conversation_id" => $this->resolveConversationId($supplier, $request)
                 ],
                 "data" => $products->items(),
@@ -612,8 +613,8 @@ class ProductController extends Controller
                     $query->Active();
                 }
             );
-            $query = $this->applyDoctorSpecialtyFilter($query, $request);
-            $query = $query->with("image", "rentalDetails", "reviews")
+/*             $query = $this->applyDoctorSpecialtyFilter($query, $request);
+ */            $query = $query->with("image", "rentalDetails", "reviews")
                 ->where("is_archive", false)
                 ->whereIn("status", ["create_accepted", "edit_accepted"]);
 

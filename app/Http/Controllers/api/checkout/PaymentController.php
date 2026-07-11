@@ -268,55 +268,61 @@ class PaymentController extends Controller
     }
 
 
-    public function webhook(Request $request)
-    {
-        $validated = $request->validate([
-            "invoice_key" => "required",
-            "invoice_status" => "required"
-        ]);
+   public function webhook(Request $request)
+{
+    $validated = $request->validate([
+        "invoice_key" => "required",
+        "invoice_status" => "required"
+    ]);
 
-        try {
-            Log::info('Fawaterk webhook received', $request->all());
-            Order::cancelExpiredPendingOrders();
+    try {
+        Log::info('Fawaterk webhook received', $request->all());
 
-            $order = Order::find($request->input('order_id'));
+        Order::cancelExpiredPendingOrders();
 
-            if (!$order || $order->status === 'cancelled') {
-                return response()->json(['message' => 'Order not found or already cancelled'], 409);
-            }
-            $status = match ($validated["invoice_status"]) {
-                "paid" => "paid",
-                "failed" => "cancelled",
-                default => "pending"
-            };
+      $status = match ($validated["invoice_status"]) {
+            "paid" => "paid",
+            "failed" => "cancelled",
+            default => "pending"
+        };
+        // Try extendRent payment first
+        $extendRent = ExtendRent::where('invoice_key', $validated["invoice_key"])->first();
 
-            $extendRent = ExtendRent::where('invoice_key', $validated["invoice_key"])->first();
-
-            if ($extendRent) {
-                $extendRent->update(['status' => $status]);
+        if ($extendRent) {
+            return $this->handlePaymentUpdate($extendRent, $status, function () use ($extendRent, $status) {
                 if ($status === 'paid') {
                     $extendRent->item->order->confirmExtension($extendRent->item_id, $extendRent);
                 }
+            });
+        } 
 
-                return response()->json(['success' => true, 'data' => $extendRent]);
-            }
+        // Fall back to a regular order payment
+        $order = Order::where('invoice_key', $validated["invoice_key"])->first();
 
-            $order = Order::where("invoice_key", $validated["invoice_key"])->first();
-
-            if (!$order) {
-                return response()->json(['error' => 'Order not found'], 404);
-            }
-
-            $order->update(["status" => $status]);
-
-            return response()->json(['success' => true, 'data' => $order]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'An issue occured ' . $e->getMessage(),
-            ], 500);
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
         }
+
+        return $this->handlePaymentUpdate($order, $status);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'error' => 'An issue occured ' . $e->getMessage(),
+        ], 500);
     }
+}
+
+private function handlePaymentUpdate($model, string $status, ?callable $onPaid = null)
+{
+    $model->update(['status' => $status]);
+
+    if ($status === 'paid' && $onPaid) {
+        $onPaid();
+    }
+
+    return response()->json(['success' => true, 'data' => $model]);
+}
     /*   public function webhook(Request $request)
     {
         $validated = $request->validate([

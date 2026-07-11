@@ -17,7 +17,7 @@
     "env": {
         "APP_ENV": "production",
         "APP_DEBUG": "false",
-        "APP_URL": "https://medconnect-one-pi.vercel.app",
+        "APP_URL": "",
         "APP_KEY": "base64:VHxiQCwfEAOfRa3dZHSsmiAIyiupRmIi6B4ExEM6QkA=",
         "APP_CONFIG_CACHE": "/tmp/config.php",
         "APP_EVENTS_CACHE": "/tmp/events.php",
