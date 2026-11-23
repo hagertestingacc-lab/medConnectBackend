@@ -9,7 +9,7 @@ use App\Services\Doctor\DoctorLicenseChecker;
 use Illuminate\Support\Facades\Log;
 
 
-class DoctorRegisteration
+class DoctorRegistration
 {
 
 public function register(array $validated, doctorDataRequest $request): array

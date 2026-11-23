@@ -13,7 +13,7 @@ class PaymentController extends Controller
 {
     //
 
-    public function excutePayment(OrderCreateRequest $request)
+    public function executePayment(OrderCreateRequest $request)
     {
         $user = $request->user();
 

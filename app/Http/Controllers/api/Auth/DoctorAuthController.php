@@ -7,8 +7,8 @@ use App\Http\Requests\doctorDataRequest;
 use App\Http\Resources\DoctorResource;
 use App\Models\AllUserPart\AllUser;
 use App\Models\DoctorPart\Doctor;
-use App\Responces\DoctorResponces;
-use App\Rules\Doctor\DoctorRegisteration;
+use App\Responses\DoctorResponses;
+use App\Rules\Doctor\DoctorRegistration;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,12 +17,12 @@ class DoctorAuthController extends Controller
 {
       public function register(doctorDataRequest $request)
     {
-        $response = new DoctorResponces();
+        $response = new DoctorResponses();
 
         try {
             // Validation passed automatically if we reach here
             $validated = $request->validated();
-            $newDoctor = new DoctorRegisteration();
+            $newDoctor = new DoctorRegistration();
             $newDoctorData = $newDoctor->register($validated, $request);
 
 
@@ -45,7 +45,7 @@ class DoctorAuthController extends Controller
      */
     public function login(Request $request)
     {
-        $response = new DoctorResponces();
+        $response = new DoctorResponses();
  $validated= $request->validate([
         "email"=>"required|email" , "password"=>"required",
         'role' => 'required|in:doctor' ]);

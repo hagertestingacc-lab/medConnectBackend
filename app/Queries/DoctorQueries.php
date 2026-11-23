@@ -4,8 +4,6 @@ use App\Models\AllUserPart\AllUser;
 use App\Models\DoctorPart\DoctorLicense;
 use App\Models\DoctorPart\Doctor;
 use App\Models\DoctorPart\DoctorAddresses;
-use App\Enums\userRole;
-use App\Enums\userStatus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;

@@ -262,7 +262,7 @@ Route::prefix("v1/product/review")->middleware(['auth:sanctum', 'doctorAuth'])->
 
 Route::prefix("v1/payment")->middleware(["auth:sanctum", "doctorAuth"])->group(function () {
     Route::get("/methods", [PaymentController::class, 'getMethods']);
-    Route::post("/", [PaymentController::class, 'excutePayment']);
+    Route::post("/", [PaymentController::class, 'executePayment']);
     Route::post("/extend-rent", [PaymentController::class, 'excuteExtendRentalPayment']);
 });
 

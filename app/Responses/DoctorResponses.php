@@ -1,9 +1,9 @@
 <?php
-namespace App\Responces;
+namespace App\Responses;
 
 
 
-class DoctorResponces
+class DoctorResponses
 {
     public function successResponseMessage(string $message,$statusCode)
 {
