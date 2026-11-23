@@ -3,7 +3,7 @@
 namespace App\Models\SupplierPart;
 
 use App\Models\AllUserPart\AllUser;
-use App\Models\customRequestsPart\OfferRequest;
+use App\Models\CustomRequestsPart\OfferRequest;
 use App\Models\ProductPart\Product;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

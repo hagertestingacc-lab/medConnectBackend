@@ -3,8 +3,8 @@
 namespace App\Policies;
 
 use App\Models\AllUserPart\AllUser;
-use App\Models\customRequestsPart\customRequest;
-use App\Models\customRequestsPart\OfferRequest;
+use App\Models\CustomRequestsPart\CustomRequest;
+use App\Models\CustomRequestsPart\OfferRequest;
 use App\Models\DoctorPart\Doctor;
 use App\Models\ProductPart\Product;
 use App\Models\User;
@@ -33,7 +33,7 @@ class AuthPolicy
     {
         return   $user->supplier->id ==  $offerRequest->supplier_id;
     }
-    public function requestDoctor(AllUser $user,customRequest $customRequest)
+    public function requestDoctor(AllUser $user, CustomRequest $customRequest)
     {
         echo "ddd";
         echo $customRequest->doctor_id;

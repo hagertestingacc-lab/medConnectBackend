@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\customRequestsPart\customRequest;
+use App\Models\CustomRequestsPart\CustomRequest;
 use Illuminate\Console\Command;
 
 class UpdateExpireCustomRequest extends Command
@@ -26,7 +26,7 @@ class UpdateExpireCustomRequest extends Command
      */
     public function handle()
     {
-$requests=customRequest::where("expires_at",">=",now())
+$requests=CustomRequest::where("expires_at",">=",now())
            ->where("status","!=","expired")->get();
 
 foreach($requests as $request)

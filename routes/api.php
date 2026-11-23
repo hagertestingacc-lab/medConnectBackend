@@ -1,27 +1,27 @@
 <?php
 
-use App\Http\Controllers\api\AdminController;
-use App\Http\Controllers\api\AllUserController;
-use App\Http\Controllers\api\CategoryController;
-use App\Http\Controllers\api\Auth\DoctorAuthController;
-use App\Http\Controllers\api\Auth\LogoutController;
-use App\Http\Controllers\api\ChatController;
-use App\Http\Controllers\api\customRequest\customRequestController;
-use App\Http\Controllers\api\customRequest\OfferRequestController;
-use App\Http\Controllers\api\DoctorLicenseController;
-use App\Http\Controllers\api\Auth\SupplierAuthController;
-use App\Http\Controllers\api\checkout\CartController;
-use App\Http\Controllers\api\checkout\OrderController;
-use App\Http\Controllers\api\Auth\PasswordsController;
-use App\Http\Controllers\api\product\ProductController;
-use App\Http\Controllers\api\product\ProductImage;
-use App\Http\Controllers\api\product\ReviewController;
-use App\Http\Controllers\api\RestockNotificationController;
-use App\Http\Controllers\api\SupplierController;
-use App\Http\Controllers\api\VerificationDoctorController;
-use App\Http\Controllers\api\checkout\PaymentController;
-use App\Http\Controllers\api\EquipmentListController;
-use App\Http\Requests\customRequest;
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AllUserController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\Auth\DoctorAuthController;
+use App\Http\Controllers\Api\Auth\LogoutController;
+use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\CustomRequest\CustomRequestController;
+use App\Http\Controllers\Api\CustomRequest\OfferRequestController;
+use App\Http\Controllers\Api\DoctorLicenseController;
+use App\Http\Controllers\Api\Auth\SupplierAuthController;
+use App\Http\Controllers\Api\Checkout\CartController;
+use App\Http\Controllers\Api\Checkout\OrderController;
+use App\Http\Controllers\Api\Auth\PasswordsController;
+use App\Http\Controllers\Api\Product\ProductController;
+use App\Http\Controllers\Api\Product\ProductImage;
+use App\Http\Controllers\Api\Product\ReviewController;
+use App\Http\Controllers\Api\RestockNotificationController;
+use App\Http\Controllers\Api\SupplierController;
+use App\Http\Controllers\Api\VerificationDoctorController;
+use App\Http\Controllers\Api\Checkout\PaymentController;
+use App\Http\Controllers\Api\EquipmentListController;
+use App\Http\Requests\CustomRequest;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
@@ -213,19 +213,19 @@ Route::prefix("v1/customRequest")->group(function () {
 
         Route::middleware("doctorAuth")->group(
             function () {
-                Route::post("/create", [customRequestController::class, 'create']);
-                Route::get("/doctor/show", [customRequestController::class, 'showBydoctor']);
-                Route::post("/cancel/{customRequest}", [customRequestController::class, 'cancel']);
-                Route::delete("/delete/{customRequest}", [customRequestController::class, 'delete']);
+                Route::post("/create", [CustomRequestController::class, 'create']);
+                Route::get("/doctor/show", [CustomRequestController::class, 'showBydoctor']);
+                Route::post("/cancel/{customRequest}", [CustomRequestController::class, 'cancel']);
+                Route::delete("/delete/{customRequest}", [CustomRequestController::class, 'delete']);
             }
         );
         Route::middleware("supplierAuth")->group(
             function () {
-                Route::get("/supplier/show", [customRequestController::class, 'showForSupplier']);
+                Route::get("/supplier/show", [CustomRequestController::class, 'showForSupplier']);
             }
         );
         Route::middleware("adminAuth")->group(function () {
-            Route::get("/admin/show", [customRequestController::class, 'showAll']); //unTested
+            Route::get("/admin/show", [CustomRequestController::class, 'showAll']); //unTested
         });
     });
 });

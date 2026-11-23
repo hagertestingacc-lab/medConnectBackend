@@ -4,7 +4,7 @@ namespace App\Models\DoctorPart;
 
 use App\Models\AllUserPart\AllUser;
 use App\Models\Cart;
-use App\Models\customRequestsPart\customRequest;
+use App\Models\CustomRequestsPart\CustomRequest;
 use App\Models\ProductPart\Review;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -47,7 +47,7 @@ class Doctor extends Authenticatable implements MustVerifyEmail
     }
     public function customRequest()
     {
-        return $this->hasMany(customRequest::class, 'doctor_id');
+        return $this->hasMany(CustomRequest::class, 'doctor_id');
     }
     public function cart()
     {
