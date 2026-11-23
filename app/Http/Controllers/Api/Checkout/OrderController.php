@@ -10,6 +10,9 @@ use App\Http\Requests\Order\CancelOrderRequest;
 use App\Http\Requests\Order\IndexOrdersRequest;
 use App\Http\Requests\OrderIssueRequest;
 use App\Http\Requests\Order\ReturnRentalProductsRequest;
+use App\Http\Resources\OrderPaginatorResource;
+use App\Http\Resources\OrderResource;
+use App\Http\Resources\ReturnedOrderItemResource;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -46,7 +49,7 @@ class OrderController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $orders,
+                'data' => (new OrderPaginatorResource($orders))->resolve(),
                 'last_page' => $orders->lastPage(),
                 'per_page' => $orders->perPage(),
                 'total' => $orders->total(),
@@ -70,7 +73,7 @@ class OrderController extends Controller
         $order->items->makeHidden('sub_status');
         return response()->json([
             'success' => true,
-            'data' => $order,
+            'data' => (new OrderResource($order))->resolve(),
         ]);
     }
 
@@ -93,7 +96,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Order cancelled successfully.',
-            'data' => $order,
+            'data' => (new OrderResource($order))->resolve(),
         ]);
     }
 
@@ -119,7 +122,7 @@ class OrderController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Issue assigned successfully.',
-            'data' => $order,
+            'data' => (new OrderResource($order))->resolve(),
         ]);
     }
 
@@ -147,7 +150,7 @@ class OrderController extends Controller
 
     return response()->json([
         'success' => true,
-        'data' => $orders->items(),
+        'data' => OrderResource::collection($orders->items())->resolve(),
         'last_page' => $orders->lastPage(),
         'per_page' => $orders->perPage(),
         'total' => $orders->total(),
@@ -182,7 +185,7 @@ public function supplierShow(Request $request, Order $order)
 
     return response()->json([
         'success' => true,
-        'data' => $order,
+        'data' => (new OrderResource($order))->resolve(),
     ]);
 }
 
@@ -267,13 +270,11 @@ public function supplierShow(Request $request, Order $order)
         return response()->json([
             'success' => true,
             'message' => 'Rental product returned successfully.',
-            'data' => [
-                'order_id' => $order->id,
-                'product_id' => $item->product_id,
-                'quantity' => $item->quantity,
-                'available_units' => $rentalDetails->available_units,
-                'stock_units' => $rentalDetails->stock_units,
-            ],
+            'data' => (new ReturnedOrderItemResource([
+                'order' => $order,
+                'item' => $item,
+                'rentalDetails' => $rentalDetails,
+            ]))->resolve(),
         ]);
     }
 

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\DoctorProductResource;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\SupplierProfileSummaryResource;
 use App\Http\Requests\Product\RecommendedProductsRequest;
 use App\Http\Requests\Product\UpdateProductArchiveRequest;
 use App\Http\Requests\Product\UpdateProductStatusRequest;
@@ -10,7 +13,6 @@ use App\Http\Requests\productRequest;
 use App\Http\Requests\productUpdateRequest;
 use App\Http\Requests\showParams;
 use App\Models\Category;
-use App\Models\Chat\Conversation;
 use App\Models\ProductPart\Product;
 use App\Models\SupplierPart\Supplier;
 use App\Notifications\customNotification;
@@ -217,23 +219,10 @@ class ProductController extends Controller
                 ->orderBy($sort_by, $sort_order)
                 ->paginate($per_page);
 
-            // Build plain arrays instead of mutating relations on the models
-            $items = $products->getCollection()->map(function ($product) use ($request) {
-                $supplier = $product->supplier;
-
-                $productArray = $product->toArray();
-                $productArray["supplier"] = array_merge($supplier?->toArray() ?? [], [
-                    "allUserId" => $supplier?->allUser?->id,
-                    "conversationId" => $this->resolveConversationId($supplier, $request),
-                ]);
-
-                return $productArray;
-            });
-
             return response()->json([
                 "success" => true,
                 "message" => "products retrieved successfully",
-                "data" => $items,
+                "data" => DoctorProductResource::collection($products->items())->resolve(),
                 "last_page" => $products->lastPage(),
                 "per_page" => $products->perPage(),
                 "total" => $products->total(),
@@ -276,19 +265,10 @@ class ProductController extends Controller
                     "message" => "Product not found",
                 ], 404);
 
-            $supplier = $product->supplier;
-
-            // Convert to array FIRST, then mutate the array
-            $productArray = $product->toArray();
-            $productArray["supplier"] = array_merge($supplier?->toArray() ?? [], [
-                "allUserId" => $supplier?->allUser?->id,
-                "conversationId" => $this->resolveConversationId($supplier, $request),
-            ]);
-
             return response()->json([
                 "success" => true,
                 "message" => "product retrieved successfully",
-                "data" => $productArray
+                "data" => (new DoctorProductResource($product))->resolve()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -318,7 +298,7 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "products retrived successfully",
-                "data" => $products->items(),
+                "data" => ProductResource::collection($products->items())->resolve(),
                 "last_page" => $products->lastPage(),
                 "per_page" => $products->perPage(),
                 "total" => $products->total(),
@@ -349,7 +329,7 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "product reetrived successfully",
-                "data" => $product
+                "data" => (new ProductResource($product))->resolve()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -386,7 +366,7 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "your products retrived successfully",
-                "data" => $products->items(),
+                "data" => ProductResource::collection($products->items())->resolve(),
                 "last_page" => $products->lastPage(),
                 "per_page" => $products->perPage(),
                 "total" => $products->total(),
@@ -423,7 +403,7 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "your product reetrived successfully",
-                "data" => $product
+                "data" => (new ProductResource($product))->resolve()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -465,15 +445,8 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "supplier products retrieved successfully",
-                "supplier" => [
-                    "id" => $supplier->id,
-                    "allUser_id" => $supplier->allUser?->id,
-                    "company_name" => $supplier->company_name,
-                    "company_image_url" => $supplier->company_image_url,
-                    "certificate_name" => $supplier->certificate_name,
-                    "conversation_id" => $this->resolveConversationId($supplier, $request)
-                ],
-                "data" => $products->items(),
+                "supplier" => (new SupplierProfileSummaryResource($supplier))->resolve(),
+                "data" => ProductResource::collection($products->items())->resolve(),
                 "last_page" => $products->lastPage(),
                 "per_page" => $products->perPage(),
                 "total" => $products->total(),
@@ -592,7 +565,7 @@ class ProductController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "products retured successfully",
-                "data" => $products->items(),
+                "data" => ProductResource::collection($products->items())->resolve(),
                 "last_page" => $products->lastPage(),
                 "per_page" => $products->perPage(),
                 "total" => $products->total(),
@@ -671,23 +644,4 @@ class ProductController extends Controller
         }
     }
 
-    private function resolveConversationId(Supplier $supplier, Request $request): ?int
-    {
-        $user = $request->user();
-        $user2 = $supplier->allUser;
-
-        if (!$user || !$user2?->id) {
-            return null;
-        }
-
-        $conversation = Conversation::where(function ($query) use ($user, $user2) {
-            $query->where('participant_one', $user->id)
-                ->where('participant_two', $user2->id);
-        })->orWhere(function ($query) use ($user, $user2) {
-            $query->where('participant_one', $user2->id)
-                ->where('participant_two', $user->id);
-        })->first();
-
-        return $conversation?->id ?? null;
-    }
 }

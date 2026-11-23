@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AllUser\UpdateDoctorAddressRequest;
 use App\Http\Requests\AllUser\UpdateDoctorImageRequest;
+use App\Http\Resources\DoctorAccountResource;
 use App\Models\AllUserPart\AllUser;
 use App\Services\Doctor\DoctorActivities;
 use Illuminate\Http\Request;
@@ -54,7 +55,7 @@ class AllUserController extends Controller
             return response()->json([
                 "success" => true,
                 "message" => "doctor returned successfully",
-                "data" => $user
+                "data" => (new DoctorAccountResource($user))->resolve()
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

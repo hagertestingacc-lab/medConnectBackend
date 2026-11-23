@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\SupplierResource;
+use App\Http\Resources\SupplierConversationResource;
 use App\Http\Requests\Supplier\UpdateSupplierStatusRequest;
 use App\Models\AllUserPart\AllUser;
-use App\Models\Chat\Conversation;
 use App\Models\SupplierPart\Supplier;
 use App\Notifications\customNotification;
 use Illuminate\Http\Request;
@@ -93,7 +93,7 @@ class SupplierController extends Controller
             return  response()->json([
                 "success" => true,
                 "message" => "supplier returned successfully",
-                "data" => $this->formatSupplierData($supplier, $request)
+                "data" => (new SupplierConversationResource($supplier))->resolve()
 
             ], 200);
         } catch (\Exception $e) {
@@ -125,9 +125,7 @@ class SupplierController extends Controller
             return  response()->json([
                 "success" => true,
                 "message" => "suppliers returned successfully",
-                "data" => $suppliers->map(function (Supplier $supplier) use ($request) {
-                    return $this->formatSupplierData($supplier, $request);
-                })->values()
+                "data" => SupplierConversationResource::collection($suppliers)->resolve()
 
             ], 200);
         } catch (\Exception $e) {
@@ -157,7 +155,7 @@ class SupplierController extends Controller
             return  response()->json([
                 "success" => true,
                 "message" => "supplier returned successfully",
-                "data" => $this->formatSupplierData($supplier, $request)
+                "data" => (new SupplierConversationResource($supplier))->resolve()
 
             ], 200);
         } catch (\Exception $e) {
@@ -170,24 +168,4 @@ class SupplierController extends Controller
         }
     }
 
-    private function formatSupplierData(Supplier $supplier, Request $request): array
-    {
-        $data = $supplier->toArray();
-        $data['conversation_id'] = $this->resolveConversationId($supplier, $request);
-
-        return $data;
-    }
-
-    private function resolveConversationId(Supplier $supplier, Request $request): ?int
-    {
-        $user = $request->user();
-
-        if (!$user || !$supplier->user_table_id) {
-            return null;
-        }
-
-        $conversation = Conversation::find($user->id, $supplier->user_table_id);
-
-        return $conversation->id ?? null;
-    }
 }

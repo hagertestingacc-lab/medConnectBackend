@@ -5,6 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Events\NewMessageSent;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Chat\SendMessageRequest;
+use App\Http\Resources\ChatContactResource;
+use App\Http\Resources\ChatConversationModelResource;
+use App\Http\Resources\ChatConversationResource;
+use App\Http\Resources\ChatConversationSummaryResource;
+use App\Http\Resources\ChatMessageModelResource;
+use App\Http\Resources\ChatMessageResource;
 use App\Models\AllUserPart\AllUser;
 use App\Models\Chat\Conversation;
 use App\Models\Chat\Message;
@@ -34,7 +40,7 @@ class ChatController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => $contacts,
+                'data' => ChatContactResource::collection($contacts)->resolve(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -59,19 +65,11 @@ class ChatController extends Controller
                     "userTwo.doctor:id,user_table_id,profile_image_url"
                 ])
                 ->orderBy('last_message_at', 'desc')
-                ->get()
-                ->map(function ($conv) use ($userId) {
-                    return [
-                        'id'              => $conv->id,
-                        'other_user'      => $conv->otherUser($userId),
-                        'last_message_at' => $conv->last_message_at,
-
-                    ];
-                });
+                ->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $conversations,
+                'data' => ChatConversationResource::collection($conversations)->resolve(),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -110,27 +108,8 @@ class ChatController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'conversation' => [
-                        'id' => $conversation->id,
-                        'participant_one' => $conversation->participant_one,
-                        'participant_two' => $conversation->participant_two,
-
-                    ],
-                    'messages' => collect($messages)->map(function ($message) {
-                        return [
-                            'id' => $message->id,
-                            'conversation_id' => $message->conversation_id,
-                            'sender_id' => $message->sender_id,
-                            'message' => $message->body,
-                            'product_id' => $message->product_id,
-                            'product_name' => $message->product?->name,
-                            'product_image' => $message->product?->image->first()?->image,
-                            'sender' => $message->sender,
-                            'read_at' => $message->read_at,
-                            'created_at' => $message->created_at,
-                            'updated_at' => $message->updated_at,
-                        ];
-                    })->values()->all(),
+                    'conversation' => (new ChatConversationSummaryResource($conversation))->resolve(),
+                    'messages' => ChatMessageResource::collection($messages)->resolve(),
                 ],
                 'total' => $messages->count()
             ]);
@@ -183,8 +162,8 @@ class ChatController extends Controller
                 'success' => true,
                 'message' => 'Message sent.',
                 'data' => [
-                    'message' => $message,
-                    'conversation' => $conversation,
+                    'message' => (new ChatMessageModelResource($message))->resolve(),
+                    'conversation' => (new ChatConversationModelResource($conversation))->resolve(),
                 ]
             ], 201);
         } catch (\Exception $e) {
