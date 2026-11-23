@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\DoctorLoginRequest;
 use App\Http\Requests\doctorDataRequest;
 use App\Http\Resources\DoctorResource;
 use App\Models\AllUserPart\AllUser;
@@ -43,12 +44,10 @@ class DoctorAuthController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function login(Request $request)
+    public function login(DoctorLoginRequest $request)
     {
         $response = new DoctorResponses();
- $validated= $request->validate([
-        "email"=>"required|email" , "password"=>"required",
-        'role' => 'required|in:doctor' ]);
+ $validated = $request->validated();
 
     try{
 

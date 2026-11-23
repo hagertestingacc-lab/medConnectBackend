@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\AdminLoginRequest;
 use App\Models\AllUserPart\AllUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -54,11 +55,9 @@ catch (\Exception $e) {
 
         }}
 
-      public function login(Request $request)
+      public function login(AdminLoginRequest $request)
     {
- $validated= $request->validate([
-        "email"=>"required|email" , "password"=>"required",
-        'role' => 'required|in:admin' ]);
+ $validated = $request->validated();
 
     try{
 

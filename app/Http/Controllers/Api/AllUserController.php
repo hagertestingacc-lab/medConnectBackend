@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AllUser\UpdateDoctorAddressRequest;
+use App\Http\Requests\AllUser\UpdateDoctorImageRequest;
 use App\Models\AllUserPart\AllUser;
 use App\Services\Doctor\DoctorActivities;
 use Illuminate\Http\Request;
@@ -61,11 +63,9 @@ class AllUserController extends Controller
             ], 500);
         }
     }
-    public function updateDoctorAddress(Request $request)
+    public function updateDoctorAddress(UpdateDoctorAddressRequest $request)
     {
-        $validated = $request->validate([
-            "address" => "string|required"
-        ]);
+        $validated = $request->validated();
         try {
             $user = $request->user();
             $user->update(["address" => $validated["address"]]);
@@ -82,12 +82,8 @@ class AllUserController extends Controller
         }
     }
 
-    public function updateDoctorImage(Request $request)
+    public function updateDoctorImage(UpdateDoctorImageRequest $request)
     {
-        $validated = $request->validate([
-            'profile_image_url' => 'required|image'
-        ]);
-
         try {
             $user = $request->user();
             $doctor = $user->doctor;

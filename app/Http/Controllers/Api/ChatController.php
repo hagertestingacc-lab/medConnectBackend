@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\NewMessageSent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Chat\SendMessageRequest;
 use App\Models\AllUserPart\AllUser;
 use App\Models\Chat\Conversation;
 use App\Models\Chat\Message;
@@ -142,13 +143,8 @@ class ChatController extends Controller
     }
 
     // Send a message â€” this also triggers the Pusher broadcast
-    public function sendMessage(Request $request)
+    public function sendMessage(SendMessageRequest $request)
     {
-        $request->validate([
-            'receiver_id' => 'required|exists:user,id',
-            'message'        => 'required|string|max:5000',
-            'product_id'    => 'nullable|exists:product,id',
-        ]);
         try {
 
             $sender   = $request->user();

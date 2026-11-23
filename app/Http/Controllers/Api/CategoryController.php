@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\CustomExceptions;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Category\StoreCategoryRequest;
+use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Requests\showParams;
 use App\Models\Category;
 use App\Services\Cloudinary;
@@ -12,14 +14,9 @@ use Illuminate\Http\Request;
 class CategoryController extends Controller
 {
 
-    public function create(Request $request)
+    public function create(StoreCategoryRequest $request)
     {
-        $validate = $request->validate([
-            "name" => "required|string|min:3|unique:category,name",
-            "description" => "required|string|min:10",
-            "image" => "required|image",
-            "is_active" => "boolean"
-        ]);
+        $validate = $request->validated();
         $image = null;
         try {
 
@@ -54,14 +51,9 @@ class CategoryController extends Controller
             ], 500);
         }
     }
-    public function update(Request $request, $id)
+    public function update(UpdateCategoryRequest $request, $id)
     {
-        $validate = $request->validate([
-            "name" => "sometimes|string|min:3|unique:category,name",
-            "description" => "sometimes|string|min:10",
-            "is_active" => "sometimes|boolean",
-            "image" => "sometimes|image",
-        ]);
+        $validate = $request->validated();
         try {
             $category = Category::find($id);
 

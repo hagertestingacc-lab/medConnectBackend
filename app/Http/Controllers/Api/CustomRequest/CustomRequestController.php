@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\CustomRequest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CustomRequest\CancelCustomRequestRequest;
 use App\Http\Requests\CustomRequestRequest;
 use App\Http\Requests\showParams;
 use App\Models\CustomRequestsPart\CustomRequest;
@@ -117,7 +118,7 @@ class CustomRequestController extends Controller
             ], 500);
         }
     }
-    public function cancel(Request $request, customRequest $customRequest)
+    public function cancel(CancelCustomRequestRequest $request, customRequest $customRequest)
     {
 
         try {

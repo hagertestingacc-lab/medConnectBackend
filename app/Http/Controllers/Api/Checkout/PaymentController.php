@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Checkout;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Payment\ExtendRentalPaymentRequest;
 use App\Http\Requests\OrderCreateRequest;
 use App\Models\ExtendRent;
 use App\Models\Order;
@@ -127,12 +128,9 @@ class PaymentController extends Controller
         return response()->json($decodedResponse, $httpCode);
     }
 
-    public function excuteExtendRentalPayment(Request $request)
+    public function excuteExtendRentalPayment(ExtendRentalPaymentRequest $request)
     {
-        $validated = $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'extension_days' => 'required|integer|min:1'
-        ]);
+        $validated = $request->validated();
 
         $user = $request->user();
         $order = Order::find($validated['order_id']);

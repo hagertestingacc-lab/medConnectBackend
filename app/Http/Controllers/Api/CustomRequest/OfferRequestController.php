@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\CustomRequest;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Offer\AssignOfferStatusRequest;
+use App\Http\Requests\Offer\RespondToOfferRequest;
 use App\Http\Requests\OfferRequestRequest;
 use App\Http\Requests\showParams;
 use App\Models\CustomRequestsPart\CustomRequest;
@@ -130,13 +132,9 @@ class OfferRequestController extends Controller
         }
     }
 
-    public function assignStatus(Request $request, OfferRequest $offerRequest)
+    public function assignStatus(AssignOfferStatusRequest $request, OfferRequest $offerRequest)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:in negotiation,shipped,delivered'
-        ], [
-            'status.in' => 'Status must not be open and must be one of: in negotiation, shipped, delivered.',
-        ]);
+        $validated = $request->validated();
 
         try {
             $this->authorize('offerSupplier', $offerRequest);
@@ -217,13 +215,9 @@ class OfferRequestController extends Controller
             ], 500);
         }
     }
-    public function offerResponseForDoctor(request $request, offerRequest $offerRequest)
+    public function offerResponseForDoctor(RespondToOfferRequest $request, offerRequest $offerRequest)
     {
-        $validated = $request->validate([
-            'response' => "required|in:rejected,accepted"
-        ], [
-            "response.in:should be rejected or accepted"
-        ]);
+        $validated = $request->validated();
         try {
 
             $this->authorize("offerResponceDoctor", $offerRequest);

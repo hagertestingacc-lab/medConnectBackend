@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\RecommendedProductsRequest;
+use App\Http\Requests\Product\UpdateProductArchiveRequest;
+use App\Http\Requests\Product\UpdateProductStatusRequest;
 use App\Http\Requests\productRequest;
 use App\Http\Requests\productUpdateRequest;
 use App\Http\Requests\showParams;
@@ -171,7 +174,7 @@ class ProductController extends Controller
 
 
 
-    public function showForDoctor(Request $request, showParams $params)
+    public function showForDoctor(RecommendedProductsRequest $request, showParams $params)
     {
         $filter_by = $params->query('filter_by');        // null if not present
         $filter_value = $params->query('filter_value');
@@ -179,9 +182,7 @@ class ProductController extends Controller
         $sort_order = $params->query('sort_order', 'asc'); // default 'asc'
         $per_page = $params->query('per_page', 15);
 
-        $request->validate([
-            "is_recommended" => "boolean"
-        ]);
+        $request->validated();
         try {
             $query = Product::query();
 
@@ -488,16 +489,9 @@ class ProductController extends Controller
 
 
     //By admin
-    public function updateStatus(request $request, $id)
+    public function updateStatus(UpdateProductStatusRequest $request, $id)
     {
-        $validated = $request->validate(
-            [
-                "status" => "required|in:create_pending,create_accepted,create_rejected,edit_pending,edit_accepted,edit_rejected"
-            ],
-            [
-                "status.in" => "The avaliable status is create_accepted create_rejected edit_pending edit_accepted edit_rejected"
-            ]
-        );
+        $validated = $request->validated();
 
         try {
 
@@ -525,11 +519,9 @@ class ProductController extends Controller
 
     //By admin - supplier
 
-    public function updateArchive(request $request, Product $product)
+    public function updateArchive(UpdateProductArchiveRequest $request, Product $product)
     {
-        $validated = $request->validate([
-            "is_archive" => "required|boolean"
-        ]);
+        $validated = $request->validated();
 
         try {
 

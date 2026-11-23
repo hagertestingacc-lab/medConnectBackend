@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\SupplierLoginRequest;
 use App\Http\Requests\supplierDataRequest;
 use App\Http\Resources\SupplierResource;
 use App\Models\AllUserPart\AllUser;
@@ -49,11 +50,9 @@ return response()->json(
 
 
 
-   public function login(Request $request)
+   public function login(SupplierLoginRequest $request)
     {
- $validated= $request->validate([
-        "email"=>"required|email" , "password"=>"required",
-        'role' => 'required|in:supplier' ]);
+ $validated = $request->validated();
 
     try{
 

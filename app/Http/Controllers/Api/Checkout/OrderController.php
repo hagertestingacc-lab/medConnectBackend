@@ -3,7 +3,13 @@
 namespace App\Http\Controllers\Api\Checkout;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Order\AdminUpdateOrderStatusRequest;
+use App\Http\Requests\Order\AssignOrderStatusRequest;
+use App\Http\Requests\Order\CancelOrderItemsRequest;
+use App\Http\Requests\Order\CancelOrderRequest;
+use App\Http\Requests\Order\IndexOrdersRequest;
 use App\Http\Requests\OrderIssueRequest;
+use App\Http\Requests\Order\ReturnRentalProductsRequest;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -13,13 +19,9 @@ use App\Notifications\customNotification;
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
+    public function index(IndexOrdersRequest $request)
     {
-        $request->validate([
-            "type" => "required|in:sale,rental"
-        ], [
-            "message" => "type must be sale or rental , by default is sale"
-        ]);
+        $request->validated();
         try {
             $doctor = $request->user()->doctor;
             $perPage = $request->query('per_page', 15);
@@ -72,7 +74,7 @@ class OrderController extends Controller
         ]);
     }
 
-    public function cancel(Request $request, Order $order)
+    public function cancel(CancelOrderRequest $request, Order $order)
     {
         $doctor = $request->user()->doctor;
 
@@ -185,13 +187,11 @@ public function supplierShow(Request $request, Order $order)
 }
 
     // product for supplier
-    public function returnRentalProducts(Request $request, Order $order)
+    public function returnRentalProducts(ReturnRentalProductsRequest $request, Order $order)
     {
         $supplier = $request->user()->supplier;
 
-        $validated = $request->validate([
-            'product_id' => 'required|integer|exists:product,id',
-        ]);
+        $validated = $request->validated();
 
         if ($order->status === 'returned') {
             return response()->json([
@@ -278,15 +278,9 @@ public function supplierShow(Request $request, Order $order)
     }
 
 
-    public function adminUpdateStatus(Request $request, Order $order)
+    public function adminUpdateStatus(AdminUpdateOrderStatusRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,paid,processing,ready,shipped,delivered,cancelled,returned',
-            'sub_status' => 'required|in:pending,confirmed,paid,processing,ready,shipped,delivered,cancelled,returned,unReturned',
-        ], [
-            'status.in' => 'The order status is not valid.',
-            'sub_status.in' => 'The item sub-status is not valid.',
-        ]);
+        $validated = $request->validated();
 
         try {
             DB::transaction(function () use ($order, $validated) {
@@ -315,12 +309,9 @@ public function supplierShow(Request $request, Order $order)
         }
     }
 
-    public function assignStatus(Request $request, Order $order)
+    public function assignStatus(AssignOrderStatusRequest $request, Order $order)
     {
-        $validated = $request->validate(
-            ['status' => 'required|in:processing,ready'],
-            ['status.in' => 'invalid status value']
-        );
+        $validated = $request->validated();
 
         try {
             $supplier = $request->user()->supplier;
@@ -356,11 +347,9 @@ public function supplierShow(Request $request, Order $order)
         }
     }
 
-    public function cancelItems(Request $request, Order $order)
+    public function cancelItems(CancelOrderItemsRequest $request, Order $order)
     {
-        $validated = $request->validate([
-            'reason' => 'required|string|max:500',
-        ]);
+        $validated = $request->validated();
 
         try {
             $supplier = $request->user()->supplier;

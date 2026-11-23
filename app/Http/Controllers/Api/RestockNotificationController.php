@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Restock\StoreRestockNotificationRequest;
 use App\Http\Requests\RestockNotificationRequest;
 use App\Models\ProductPart\Product;
 use App\Models\RestockNotification;
@@ -11,7 +12,7 @@ use Illuminate\Http\Request;
 
 class RestockNotificationController extends Controller
 {
-    public function store(Request $request,Product $product)
+    public function store(StoreRestockNotificationRequest $request, Product $product)
     {
         $doctor = $request->user()->doctor;
 

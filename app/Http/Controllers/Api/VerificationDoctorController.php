@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Verification\ResendExpiredVerificationRequest;
 use App\Models\AllUserPart\AllUser;
 use App\Models\DoctorPart\DoctorLicense;
 use Carbon\Carbon;
@@ -46,9 +47,9 @@ $this->updateUserStatus($doctorUser);
 
 //resend Expired verfication
 
-public function resendExpired(Request $request ){
+public function resendExpired(ResendExpiredVerificationRequest $request ){
 
-$request->validate(['email' => 'required|email:rfc,dns', 'password'=>'required']);
+$request->validated();
 
 $doctor = AllUser::where("email",$request->email)->first();
 

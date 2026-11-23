@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
+use App\Http\Requests\Auth\VerifyOtpRequest;
 use App\Models\AllUserPart\AllUser;
 use App\Notifications\otpNotification;
 use Ichtrojan\Otp\Otp;
@@ -14,12 +17,10 @@ class PasswordsController extends Controller
 
 
 
-public function forgetPassword(Request $request)
+public function forgetPassword(ForgotPasswordRequest $request)
 {
 
-$validate = $request->validate([
-    "email"=>"required|email|string|min:10"
-]);
+$validate = $request->validated();
 
 try{
 
@@ -48,13 +49,10 @@ catch (\Exception $e) {
 
 
 
-public function verifyOtp(Request $request)
+public function verifyOtp(VerifyOtpRequest $request)
 {
 
-    $validate = $request->validate([
-        "email"=>"required|email|min:10",
-    "otp"=>"required|digits:4|numeric"
-]);
+    $validate = $request->validated();
 
 try{
 $otp = new Otp();
@@ -92,13 +90,10 @@ catch (\Exception $e) {
 
 }
 
-public function resetPasswords(Request $request)
+public function resetPasswords(ResetPasswordRequest $request)
 {
 
-    $validate = $request->validate([
-   'password' => ['required','string','confirmed','min:8','regex:/^(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/'],
-],
-['password.regex' => 'Password must contain at least 1 uppercase, 1 number, 1 symbol, and be 8+ characters.']);
+    $validate = $request->validated();
 
 try{
     $user =$request->user();

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Resources\SupplierResource;
+use App\Http\Requests\Supplier\UpdateSupplierStatusRequest;
 use App\Models\AllUserPart\AllUser;
 use App\Models\Chat\Conversation;
 use App\Models\SupplierPart\Supplier;
@@ -37,12 +38,10 @@ class SupplierController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateSupplierStatusRequest $request, $id)
     {
         //Validate the status from request
-        $validated = $request->validate([
-            "status" => "required|in:active,inactive,pending,suspended"
-        ]);
+        $validated = $request->validated();
         try {
 
             //Search for supplier in AllUser table
