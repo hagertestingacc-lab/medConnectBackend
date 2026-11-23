@@ -11,3 +11,4 @@ Tasks:
 7. After the changes run: composer dump-autoload, php artisan route:list (the output must be identical to before), and php artisan test if tests exist.
 
 Before editing, save `php artisan route:list --json > routes_before.json` and compare it after. Report a short list of the files changed and anything you skipped or were unsure about.
+

@@ -72,39 +72,6 @@ class OrderController extends Controller
         ]);
     }
 
-    /*   public function store(OrderCreateRequest $request)
-    {
-        try {
-            $doctor = $request->user()->doctor;
-            $validated = $request->validated();
-
-        if($validated['order_type'] === 'sale')
-            $order= Order::makeCartOrder($doctor,$validated);
-
-/*
-         if ($validated['order_type'] === 'rental' && (empty($item['rental_start']) || empty($item['rental_end']))) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Rental items must include rental_start and rental_end.',
-                    ], 422);
-                } */
-
-
-
-    /*       return response()->json([
-                'success' => true,
-                'message' => 'Order created successfully.',
-                'data' => $order,
-            ], 201);
-        }
-         catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'An issue occurred: ' . $e->getMessage(),
-            ], 500);
-        }
-    }  */
-
     public function cancel(Request $request, Order $order)
     {
         $doctor = $request->user()->doctor;
@@ -442,52 +409,4 @@ public function supplierShow(Request $request, Order $order)
         }
     }
 
-    /*   public function assignStatus(Request $request, Order $order)
-    {
-        $validated =  $request->validate(
-            [
-                "status" => "required|in:processing,ready"
-            ],
-            [
-                "status.in" => "you can only assign to processing or ready"
-            ]
-        );
-        try {
-
-            $user = $request->user()->supplier;
-
-
-
-            $order->items()->ForSupplier($user->id)
-                ->update(["sub_status" => $validated["status"]]);
-
-            $statuses = $order->items->pluck("sub_status");
-
-            $order->status = match (true) {
-                $statuses->contains("processing") => "processing",
-                $statuses->every(fn($s) => $s === 'ready') => "ready",
-                default                => $order->status
-            };
-
-
-
-            if ($order->isDirty('status')) {
-                $order->save();
-
-                $order->doctor->allUser->notifyNow(new customNotification("Your order  {$order->order_number} is now {$order->status}"));
-            }
-
-            return response()->json(
-                [
-                    "success" => true,
-                    "message" => "order upated successfully"
-                ]
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'An issue occurred: ' . $e->getMessage(),
-            ], 500);
-        }
-    } */
 }

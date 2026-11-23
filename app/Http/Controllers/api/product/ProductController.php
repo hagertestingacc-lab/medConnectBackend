@@ -194,11 +194,6 @@ class ProductController extends Controller
             if (!(empty($filter_by) && empty($filter_value))) {
                 $query->where($filter_by, $filter_value);
             }
-            /*     else
-            {
-           $query = $this->applyDoctorSpecialtyFilter($query, $request);
-
-            } */
             $products = $query->whereHas(
                 "category",
                 function ($query) {
@@ -451,8 +446,6 @@ class ProductController extends Controller
 
 
             $query = $supplier->product()->with(["image", "rentalDetails", "reviews"]);
-            /*             $query = $this->applyDoctorSpecialtyFilter($query, $request);
- */
             if (!(empty($filter_by) && empty($filter_value))) {
                 $query->where($filter_by, $filter_value);
             }
@@ -491,47 +484,6 @@ class ProductController extends Controller
             ], 500);
         }
     }
-    /*   public function showBySupplierProfile(showParams $params, Supplier $supplier)
-    {
-        $filter_by = $params->query('filter_by');        // null if not present
-        $filter_value = $params->query('filter_value');
-        $sort_by = $params->query('sort_by', 'id');      // default 'id'
-        $sort_order = $params->query('sort_order', 'asc'); // default 'asc'
-        $per_page = $params->query('per_page', 15);
-        try {
-            $query = $supplier->product()->with(["image", "rentalDetails", "supplier:id,company_name,company_image_url,certificate_name,certificate_image,governorate,phone", "reviews"]);
-
-            if (!(empty($filter_by) && empty($filter_value))) {
-                $query->where($filter_by, $filter_value);
-            }
-            $products = $query->whereHas(
-                "category",
-                function ($query) {
-                    $query->Active();
-                }
-            )
-                ->where("is_archive", false)
-                ->whereIn("status", ["create_accepted", "edit_accepted"])
-                ->orderBy($sort_by, $sort_order)
-                ->paginate($per_page);
-
-
-            return response()->json([
-                "success" => true,
-                "message" => "supplier products reetrived successfully",
-                "data" => $products->items(),
-                "last_page" => $products->lastPage(),
-                "per_page" => $products->perPage(),
-                "total" => $products->total(),
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                "success" => false,
-                "error" => "An issue occured" . $e->getMessage(),
-            ], 500);
-        }
-    }
- */
 
 
 
@@ -613,8 +565,7 @@ class ProductController extends Controller
                     $query->Active();
                 }
             );
-/*             $query = $this->applyDoctorSpecialtyFilter($query, $request);
- */            $query = $query->with("image", "rentalDetails", "reviews")
+            $query = $query->with("image", "rentalDetails", "reviews")
                 ->where("is_archive", false)
                 ->whereIn("status", ["create_accepted", "edit_accepted"]);
 
@@ -689,24 +640,6 @@ class ProductController extends Controller
         });
     }
 
-    /*    private function getCategoryIdByName($name)
-    {
-        if (blank($name)) {
-            return null;
-        }
-
-        $name = trim($name);
-        if ($name === '') {
-            return null;
-        }
-
-        $category = Category::whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($name) . '%'])
-            ->orWhereRaw('LOWER(name) = ?', [strtolower($name)])
-            ->first();
-
-        return $category?->id ?? null;
-    } */
-
     private function uploadImage($files, $product)
     {
 
@@ -751,8 +684,6 @@ class ProductController extends Controller
         $user = $request->user();
         $user2 = $supplier->allUser;
 
-        /*    print_r($user2->id);
- */
         if (!$user || !$user2?->id) {
             return null;
         }

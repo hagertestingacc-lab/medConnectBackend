@@ -177,9 +177,6 @@ Route::prefix('v1/restock-notification')->middleware(['auth:sanctum'])->group(fu
         Route::get('/is-notify/{product}', [RestockNotificationController::class, 'isNotify']);
     });
 
-    /*  Route::middleware('supplierAuth')->group(function () {
-        Route::post('/notify/{product}', [RestockNotificationController::class, 'notify']);
-    }); */
 });
 
 Route::prefix('v1/cart')->middleware(['auth:sanctum', 'doctorAuth'])->group(function () {
@@ -187,8 +184,6 @@ Route::prefix('v1/cart')->middleware(['auth:sanctum', 'doctorAuth'])->group(func
     Route::post('/add/{product}', [CartController::class, 'addItem']);
     Route::post('/update/{cart}', [CartController::class, 'updateQuantity']);
     Route::delete('/delete/{cart}', [CartController::class, 'deleteItem']);
-    /* Route::post('/update-dates/{cart}', [CartController::class, 'updateRentalDates']);
- */
 });
 
 Route::post("v1/validateRent/{product}", [CartController::class, "validateRent"])->middleware(["auth:sanctum"]);
@@ -300,16 +295,6 @@ Route::get('/payment/success', function () {
 Route::get('/payment/failed', function () {
     return view('payment.failed');
 });
-// Protected routes (require verified email)
-/* Route::get('/profile', function () {
-
-
-
-})->middleware(['auth', 'verified']);
-*//*
-Route::post("/doctor/register",[AuthController::class,'register'])
-->middleware(doctorLicenseChecker::class); */
-
 Route::prefix("v1/equipment-list")->middleware(['auth:sanctum', 'doctorAuth'])->group(function () {
     Route::get('/', [EquipmentListController::class, 'index']);
     Route::post('/', [EquipmentListController::class, 'store']);
@@ -332,11 +317,3 @@ Route::prefix("v1/conversations")->middleware('auth:sanctum')->group(function ()
     Route::post('/messages',   [ChatController::class, 'sendMessage']);
     Route::patch('{id}/read',   [ChatController::class, 'markAsRead']);
 });
-/*
-
-
-Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-$request->fulfill();
-return redirect('/home');
-})->middleware(['auth', 'signed'])->name('verification.verify');
-*/

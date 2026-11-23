@@ -225,12 +225,6 @@ class Order extends Model
     public function extendRentalDays(array $data)
     {
         // Check if order is paid and is rental type
-        /*  if ($this->status !== 'delivered' || $this->order_type !== 'rental') {
-            return [
-                "success" => false,
-                "error" => "Order must be delivered and rental type to extend"
-            ];
-        } */
 
         $item = $this->items()->first();
         if (!$item || !$item->product->is_rentable) {

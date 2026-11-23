@@ -16,18 +16,7 @@ class RentalReminderController extends Controller
 
          $this->authorizeCron($request);
 
-        /* // Protect the endpoint so randoms can't trigger it
-        if ($request->header('Authorization') !== 'Bearer ' . config('services.cron.secret')) {
-            abort(403);
-        }
- */
          $targetDate = Carbon::now()->addDays(2)->toDateString();
-      
-/*   $targetDate = Carbon::now()->subDays(2)->toDateString();
- */     
-
-/* $targetDate="2026-04-24";
- *//*  */
 
         $orders = Order::where('order_type', 'rental')
             ->whereHas('items', function ($q) use ($targetDate) {

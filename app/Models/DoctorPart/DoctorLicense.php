@@ -12,26 +12,6 @@ public $incrementing = false;
 public $timestamps = false;
 
      protected $table ="doctor_licenses";
-/* protected $fillable = [
-    "license_number",
-    "full_name",
-    "national_id",
-    "specialty",
-    "issue_authority",
-    "authority_type",
-    "syndicate_number",
-    "syndicate_branch",
-    "issue_date",
-    "expiry_date",
-    "license_status",
-    "governorate",
-    "city",
-    "workplace",
-    "workplace_type",
-    "license_level ",
-    "last_updated",
-    "can_purchase"
-]; */
 protected $hidden = [
     "syndicate_number",
     "syndicate_branch",

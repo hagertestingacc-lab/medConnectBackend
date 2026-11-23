@@ -54,8 +54,6 @@ class AllUser extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            /*       'role' =>'App\Enums\UserRole',
-            'status'=>'App\Enums\UserStatus' */
         ];
     }
 

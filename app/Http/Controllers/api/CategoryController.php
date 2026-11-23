@@ -14,8 +14,6 @@ class CategoryController extends Controller
 
     public function create(Request $request)
     {
-        /*     echo "create";
- */
         $validate = $request->validate([
             "name" => "required|string|min:3|unique:category,name",
             "description" => "required|string|min:10",
@@ -75,8 +73,6 @@ class CategoryController extends Controller
 
 
             $updateData = $validate;
-            /* echo "validation";
- */
             print_r($validate);
 
             if ($request->hasFile('image')) {
@@ -147,8 +143,6 @@ class CategoryController extends Controller
         try {
 
             $query = Category::query();
-/*             $query = $this->applyDoctorSpecialtyFilter($query, $request);
- */
             if (!(empty($filter_by) && empty($filter_value))) {
                 $query->where($filter_by, $filter_value);
             }
@@ -176,8 +170,7 @@ class CategoryController extends Controller
     {
         try {
             $query = Category::select(['id', 'name', 'description', "image", "is_active"])->where("is_active", 1);
-/*             $query = $this->applyDoctorSpecialtyFilter($query, $request);
- */            $category = $query->find($id);
+            $category = $query->find($id);
 
             if (!$category)
                 return  response()->json([
@@ -286,8 +279,6 @@ class CategoryController extends Controller
 
     private function uploadImage($file, $public_id = null)
     {
-        /*     echo "upload";
- */
 
 
         if (!$file->isValid())
@@ -297,8 +288,6 @@ class CategoryController extends Controller
 
             ], status: 422);
         $Cloudinary = new Cloudinary();
-        /* echo $file->getRealPath();
- */
         $result =  $Cloudinary->upload($file->getRealPath(), [
             'public_id' => $public_id ?? 'category' . uniqid(true),
             'use_filename' => true,

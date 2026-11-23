@@ -90,13 +90,6 @@ if(!$doctor) {
 }
 
 $doctorLicense= $doctor->doctorLicense;
-
-/*
-
-if($doctorLicense->expiry_date->isPast() )
-    {$doctorUser->status="suspended";}
-    else{
-        } */
         $doctorUser->status="active";
     $doctor->is_verified=true;
     $doctorUser->save();

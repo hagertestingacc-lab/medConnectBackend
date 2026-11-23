@@ -26,12 +26,10 @@ class UpdateLicenseStatus extends Command
      */
     public function handle()
     {
-        /*update active -> expire */
         DoctorLicense::where('expiry_date','<' ,now())
         ->where('license_status','active')
         ->update(['license_status'=>'expired']);
 
-        /*update expire -> update */
         DoctorLicense::where('expiry_date','>' ,now())
         ->where('license_status','expired')
         ->update(['license_status'=>'active']);

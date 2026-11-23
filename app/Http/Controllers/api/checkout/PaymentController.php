@@ -323,41 +323,4 @@ private function handlePaymentUpdate($model, string $status, ?callable $onPaid =
 
     return response()->json(['success' => true, 'data' => $model]);
 }
-    /*   public function webhook(Request $request)
-    {
-        $validated = $request->validate([
-            "invoice_key" => "required",
-            "invoice_status" => "required"
-        ]);
-        try {
-            log::info('Fawaterk webhook received', $request->all());
-
-            $order = Order::where("invoice_key", $validated["invoice_key"])->first();
-            if (!$order) {
-                return response()->json(['error' => 'Order not found'], 404);
-            }
-            $status = match ($validated["invoice_status"]) {
-                "paid" => "paid",
-                "failed" => "cancelled",
-                default => "pending"
-            };
-
-            // Check if this is an extension payment
-            if ($order->order_issue && str_starts_with($order->order_issue, 'extension:')) {
-                if ($status === 'paid') {
-                    $extensionMeta = json_decode(substr($order->order_issue, 10), true);
-                    $order->confirmExtension($extensionMeta['item_id'], $extensionMeta['extension_days']);
-                }
-            } else {
-                $order->update(["status" => $status]);
-            }
-
-            return response()->json(['success' => true, "data" => $order]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'An issue occured ' . $e->getMessage(),
-            ], 500);
-        }
-    } */
 }

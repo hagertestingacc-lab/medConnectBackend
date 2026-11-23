@@ -81,59 +81,10 @@ class ChatController extends Controller
     }
 
     // Get messages inside a conversation (paginated)
-    /*  public function messages(Request $request,AllUser $reciverId)
-    {
-        try {
-            $userId= $request->user()->id;
-           $user2=$reciverId->role=="doctor"?$reciverId->doctor:$reciverId->supplier;
-
-            $conversation=Conversation::where("participant_one",$userId)->Where("participant_two",$user2->id)->first();
-            $reciver=$reciverId->get("fullname,id")
-            if(!$conversation)
-                return response()->json([
-                    'success' => true,
-                    'data'=>[
-                        "reciver"=>$user2->
-                    ]
-                ], 403);
-
-            // Only participants can view messages
-            if ($conversation->participant_one != $userId && $conversation->participant_two != $userId) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Unauthorized.',
-                ], 403);
-            }
-            $reciverData=$conversation->userTwo();
-            $messages = $conversation->messages()
-                ->paginate(50);
-
-            $data["reciver"]=$reciverData;
-            $data["messages"]=$messages->items();
-
-
-
-            return response()->json([
-                'success' => true,
-                'data' => $data,
-                "last_page" => $messages->lastPage(),
-                "per_page" => $messages->perPage(),
-                "total" => $messages->total()
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    } */
-    // Get messages inside a conversation (paginated)
     public function messages(Request $request, Conversation $conversation)
     {
         try {
             $userId       = $request->user()->id;
-            /*             $conversation = Conversation::findOrFail($conversationId);
- */
             // Only participants can view messages
             if ($conversation->participant_one != $userId && $conversation->participant_two != $userId) {
                 return response()->json([
@@ -248,22 +199,6 @@ class ChatController extends Controller
         }
     }
 
-    /*   public function startChat(Request $request, Supplier $supplier)
-    {
-        try {
-
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Supplier returned successfully',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    } */
     public function markAsRead(Request $request, $conversationId)
     {
         try {

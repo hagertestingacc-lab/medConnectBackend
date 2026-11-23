@@ -23,8 +23,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
-
+routes_before.json
 .vercel
 
 .vercel
 .env*
+
